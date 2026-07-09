@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../services/call_service.dart';
 
 class AppProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;
@@ -9,6 +11,14 @@ class AppProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
   String? _token;
   Map<String, dynamic>? _user;
+  String _searchQuery = '';
+
+  String get searchQuery => _searchQuery;
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     serverClientId: '339408421821-bclcpvr9vpue3t1iqst0ochg0fcspsu9.apps.googleusercontent.com',
@@ -28,9 +38,13 @@ class AppProvider extends ChangeNotifier {
   Future<void> _loadSession() async {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
+    final userStr = prefs.getString('user');
     if (_token != null) {
       _isLoggedIn = true;
-      // You could also load user info here if stored
+      if (userStr != null) {
+        _user = jsonDecode(userStr);
+        _connectCallServiceIfPossible();
+      }
     }
     notifyListeners();
   }
@@ -54,7 +68,10 @@ class AppProvider extends ChangeNotifier {
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', _token!);
-      
+      if (_user != null) {
+        await prefs.setString('user', jsonEncode(_user));
+      }
+      _connectCallServiceIfPossible();
       notifyListeners();
     }
     return result;
@@ -89,7 +106,10 @@ class AppProvider extends ChangeNotifier {
         
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', _token!);
-        
+        if (_user != null) {
+          await prefs.setString('user', jsonEncode(_user));
+        }
+        _connectCallServiceIfPossible();
         notifyListeners();
       }
       return result;
@@ -104,12 +124,22 @@ class AppProvider extends ChangeNotifier {
     return result;
   }
 
+  Future<Map<String, dynamic>> sendVerificationCode(String email) async {
+    return await ApiService.sendVerificationCode(email);
+  }
+
+  Future<Map<String, dynamic>> verifyCode(String email, String code) async {
+    return await ApiService.verifyCode(email, code);
+  }
+
   Future<void> logout() async {
+    CallService().disconnect();
     _isLoggedIn = false;
     _token = null;
     _user = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
+    await prefs.remove('user');
     notifyListeners();
   }
 
@@ -122,5 +152,22 @@ class AppProvider extends ChangeNotifier {
   // Simple translation helper
   String translate(String fr, String en) {
     return _locale.languageCode == 'fr' ? fr : en;
+  }
+
+  void _connectCallServiceIfPossible() {
+    final user = _user;
+    final userId = user?['_id']?.toString();
+    if (userId == null || userId.isEmpty) {
+      return;
+    }
+
+    final prenom = user?['prenom']?.toString() ?? '';
+    final nom = user?['nom']?.toString() ?? '';
+    final displayName = '$prenom $nom'.trim();
+
+    CallService().connect(
+      userId: userId,
+      userName: displayName.isEmpty ? 'Utilisateur' : displayName,
+    );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
@@ -6,12 +8,17 @@ import 'pages/marketplace_page.dart';
 import 'pages/calendar_view_page.dart';
 import 'pages/alarm_page.dart';
 import 'pages/profile_page.dart';
+import 'pages/chat_list_page.dart';
 import 'pages/notifications_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
+import 'pages/call_screen.dart';
+import 'services/call_service.dart';
 import 'widgets/app_bottom_nav.dart';
 import 'widgets/app_header.dart';
+
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   runApp(
@@ -41,6 +48,7 @@ class MyApp extends StatelessWidget {
     final darkBase = ThemeData.dark();
 
     return MaterialApp(
+      navigatorKey: rootNavigatorKey,
       title: 'Fallega',
       debugShowCheckedModeBanner: false,
       themeMode: appProvider.themeMode,
@@ -93,16 +101,46 @@ class RootShell extends StatefulWidget {
 class _RootShellState extends State<RootShell> {
   int index = 0;
   int previousIndex = 0;
+  StreamSubscription<Map<String, dynamic>>? _incomingCallSubscription;
   final pages = const [
     DashboardPage(),
     MarketplacePage(),
     CalendarViewPage(),
-    _PlaceholderPage(title: 'Chat'),
+    ChatListPage(),
     AlarmPage(),
     ProfilePage(),
     NotificationsPage(),
     SettingsPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _incomingCallSubscription = CallService().onIncomingCall.listen((data) {
+      final navigator = rootNavigatorKey.currentState;
+      final context = rootNavigatorKey.currentContext;
+      if (navigator == null || context == null) {
+        return;
+      }
+
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => CallScreen(
+            remoteUserId: data['callerId']?.toString() ?? '',
+            remoteUserName: data['callerName']?.toString() ?? 'Appel entrant',
+            isIncoming: true,
+            isVideo: data['type'] == 'video',
+          ),
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _incomingCallSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,12 +150,12 @@ class _RootShellState extends State<RootShell> {
     final titles = [
       appProvider.translate('Dashboard', 'Dashboard'),
       appProvider.translate('Marketplace', 'Marketplace'),
-      appProvider.translate('Calendrier', 'Calendar'),
+      appProvider.translate('Calendar', 'Calendar'),
       appProvider.translate('Chat', 'Chat'),
-      appProvider.translate('Réveil', 'Alarm'),
-      appProvider.translate('Profil', 'Profile'),
+      appProvider.translate('Alarm', 'Alarm'),
+      appProvider.translate('Profile', 'Profile'),
       appProvider.translate('Notifications', 'Notifications'),
-      appProvider.translate('Paramètres', 'Settings'),
+      appProvider.translate('Settings', 'Settings'),
     ];
 
     return Scaffold(

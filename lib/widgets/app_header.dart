@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
+import '../providers/app_provider.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
@@ -102,6 +104,7 @@ class AppHeader extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: TextField(
               style: TextStyle(color: isDark ? kDarkText : kDark),
+              onChanged: (val) => context.read<AppProvider>().setSearchQuery(val),
               decoration: InputDecoration(
                 hintText: 'Rechercher...',
                 hintStyle: TextStyle(color: isDark ? Colors.grey : Colors.grey.shade400),

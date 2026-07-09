@@ -43,6 +43,10 @@
 		</array>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
+		<key>NSCameraUsageDescription</key>
+		<string>Fallega a besoin d'acceder a la camera pour les appels video.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Fallega a besoin d'acceder au microphone pour les appels audio et video.</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UIStatusBarHidden</key>

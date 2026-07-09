@@ -236,17 +236,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                TextButton(
-                  onPressed: () => appProvider.loginAsGuest(),
-                  child: Text(
-                    appProvider.translate('Continuer sans compte', 'Continue as guest'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
               ],
             ),
           ),
