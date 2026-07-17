@@ -361,4 +361,46 @@ class ApiService {
       return {'success': false, 'message': e.toString(), 'statusCode': 500};
     }
   }
+
+  // --- Events ---
+
+  static Future<List<dynamic>> getEvents(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/events'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching events: $e');
+      return [];
+    }
+  }
+
+  // --- Marketplace / Equipment Rentals ---
+
+  static Future<List<dynamic>> getMarketplaceProducts(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/equipement-stock/rentals'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching marketplace products: $e');
+      return [];
+    }
+  }
 }

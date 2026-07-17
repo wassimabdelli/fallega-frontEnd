@@ -22,10 +22,7 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppProvider(),
-      child: const MyApp(),
-    ),
+    ChangeNotifierProvider(create: (_) => AppProvider(), child: const MyApp()),
   );
 }
 
@@ -63,10 +60,7 @@ class MyApp extends StatelessWidget {
           foregroundColor: kDark,
           elevation: 0,
         ),
-        textTheme: base.textTheme.apply(
-          bodyColor: kDark,
-          displayColor: kDark,
-        ),
+        textTheme: base.textTheme.apply(bodyColor: kDark, displayColor: kDark),
       ),
       darkTheme: darkBase.copyWith(
         useMaterial3: true,
@@ -177,16 +171,20 @@ class _RootShellState extends State<RootShell> {
                 previousIndex = index;
                 index = 7;
               }),
-              onBackTap: isSubPage ? () => setState(() => index = previousIndex) : null,
+              onBackTap: isSubPage
+                  ? () => setState(() => index = previousIndex)
+                  : null,
             ),
             Expanded(child: pages[index]),
           ],
         ),
       ),
-      bottomNavigationBar: index < 6 ? AppBottomNav(
-        selectedIndex: index,
-        onSelected: (i) => setState(() => index = i),
-      ) : null,
+      bottomNavigationBar: index < 6
+          ? AppBottomNav(
+              selectedIndex: index,
+              onSelected: (i) => setState(() => index = i),
+            )
+          : null,
     );
   }
 }
@@ -197,10 +195,7 @@ class _PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, color: kDark),
-      ),
+      child: Text(title, style: const TextStyle(fontSize: 18, color: kDark)),
     );
   }
 }
